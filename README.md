@@ -25,7 +25,7 @@ Used Techniques are:
 - Data transformation + test: dbt
 
 ## How to run it
-### Option 1 CodesSpaces (Linux environment)
+### Option 1 Ubuntu 20.04 (Linux environment)
 #### Getting Start
 - Step 1 Install **Astro Cli**
 ```bash
@@ -50,7 +50,7 @@ astro dev start
 - Go to port 8080 to check the data pipeline in the UI
 URL: http://localhost:8080
 
-### Option 2 Local Run (Windows environment)
+### Option 2 Local Run, Git Bash (Windows environment)
 #### Prerequisites
 1. Docker (Link: https://docs.docker.com/get-docker/)
 2. Python 3.8 or later
