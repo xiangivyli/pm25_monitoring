@@ -51,6 +51,19 @@ astro dev start
 - Go to port 8080 to check the data pipeline
 URL: https://localhost:8080
 
+### Option 2 Local Run (Windows environment)
+#### Prerequisites
+1. Docker
+2. Python 3.8 or later
+3. `pip` and `virtualenv` for Python
+4. Clone this repository:
+   ```bash
+   git clone ...
+   cd pm25_monitoring
+   ```
+
+
+  
 
 
 
