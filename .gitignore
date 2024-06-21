@@ -1,6 +1,1 @@
-# Ignore installation scripts
-Anaconda3-*.sh
-
-# Ignore environment variables
-.env
 
