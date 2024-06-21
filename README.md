@@ -53,15 +53,29 @@ URL: https://localhost:8080
 
 ### Option 2 Local Run (Windows environment)
 #### Prerequisites
-1. Docker
+1. Docker (Link: https://docs.docker.com/get-docker/)
 2. Python 3.8 or later
 3. `pip` and `virtualenv` for Python
 4. Clone this repository:
    ```bash
-   git clone ...
+   git clone https://github.com/xiangivyli/pm25_monitoring.git
    cd pm25_monitoring
    ```
 
+#### Getting Start, instructions use Git Bash to run these commands
+1. Setup Python virtual environment
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
+```
+2. Install Astro Cli
+```bash
+cd airflow
+winget install -e --id Astronomer.Astro
+```
+3. Run `astro dev start` in the airflow folder
+4. After your Astro project has started. View the Airflow UI at `localhost:8080`.
+5. View the streamlit app at `localhost:8501`.
 
   
 
