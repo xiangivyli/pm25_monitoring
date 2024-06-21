@@ -3,6 +3,7 @@
 # --------------- #
 
 from airflow import Dataset
+from pendulum import duration
 
 # ----------------------- #
 # Configuration variables #

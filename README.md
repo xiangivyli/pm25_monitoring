@@ -21,7 +21,7 @@ In this program, a final report shows
 Used Techniques are:
 - Data Orchestration + Containerization: Astro CLI (Apache Airflow + Docker Compose)
 - Get data from API: Python
-- Data storage: SQLite
+- Data storage: DuckDB
 - Data transformation + test: dbt
 
 ## How to run it
