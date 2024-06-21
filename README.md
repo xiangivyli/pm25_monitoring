@@ -27,9 +27,12 @@ Used Techniques are:
 ## How to run it
 ### Option 1 CodesSpaces (Linux environment)
 #### Getting Start
-- **Step 1 Create a Python virtual environment and activate it**
+- Step 1 Install **Astro Cli**
 ```bash
-mkdir airflow/
+curl -sSL install.astronomer.io | sudo bash -s
+```
+- **Step 2 Create a Python virtual environment and activate it**
+```bash
 cd airflow/
 # Setup Python, install python3-venv package
 sudo apt-get update
@@ -39,17 +42,13 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-- Step 2 Install **Astro Cli**
-```bash
-curl -sSL install.astronomer.io | sudo bash -s
-```
-
+- **Step 3 Start the containers to run Airflow**
 ```bash
 astro dev start
 ```
 
-- Go to port 8080 to check the data pipeline
-URL: https://localhost:8080
+- Go to port 8080 to check the data pipeline in the UI
+URL: http://localhost:8080
 
 ### Option 2 Local Run (Windows environment)
 #### Prerequisites
