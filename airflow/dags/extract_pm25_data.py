@@ -39,14 +39,16 @@ start_dataset = Dataset("duckdb_pm25")
     description="DAG that retrieves device id from airbox project and saves it to a list.",
     tags=["step2"]
 )
-def extract_device_id_airbox():
+def extract_pm25_to_db():
+
+
     """
     this task run too slow as there are too many missing values, I chose a valid id directly
     # use the /project/{project}/latest endpoint to extract active device ids
     @task
     def get_one_valid_device_id():
-        """use the 'fetch_device_ids' function from the local 'metereology_utils'
-        module to retrieve only 1 active device id from airbox project"""
+        # use the 'fetch_device_ids' function from the local 'api_request'
+        # module to retrieve only 1 active device id from airbox project
 
         device_ids = fetch_device_ids(api_url)
 
@@ -74,38 +76,38 @@ def extract_device_id_airbox():
         return all_device_data
 
     @task
-    def flatten_json_to_df(json_data):
-        """Flatten JSON data and convert it to a pandas DataFrame."""
-       flattened_data = []
+    def flatten_json_to_df(all_device_data):
+        """Flatten JSON data, keep needed columns and convert it to a pandas DataFrame."""
+        flattened_data = []
    
-       for record in json_data:
-           device_id = record.get('device_id')
-           source = record.get('source')
-           
-           for feed in record.get('feeds', []):
-               for airbox in feed.get('AirBox', []):
-                   for timestamp, data in airbox.items():
-                       flattened_record = {
-                           'device_id': device_id,
-                           'source': source,
-                           'timestamp': timestamp,
-                           'date': data.get('date'),
-                           'gps_lat': data.get('gps_lat'),
-                           'gps_lon': data.get('gps_lon'),
-                           's_d0': data.get('s_d0'),
-                           's_d1': data.get('s_d1'),
-                           's_d2': data.get('s_d2'),
-                           's_h0': data.get('s_h0'),
-                           's_t0': data.get('s_t0'),
-                       }
-                       flattened_data.append(flattened_record)
-       
-       # Convert to DataFrame
-       df = pd.DataFrame(flattened_data)
-       return df
+        for record in all_device_data:
+            device_id = record.get('device_id')
+            source = record.get('source')
+            
+            for feed in record.get('feeds', []):
+                for airbox in feed.get('AirBox', []):
+                    for timestamp, data in airbox.items():
+                        flattened_record = {
+                            'device_id': device_id,
+                            'source': source,
+                            'timestamp': timestamp,
+                            'date': data.get('date'),
+                            'gps_lat': data.get('gps_lat'),
+                            'gps_lon': data.get('gps_lon'),
+                            's_d0': data.get('s_d0'),
+                            's_d1': data.get('s_d1'),
+                            's_d2': data.get('s_d2'),
+                            's_h0': data.get('s_h0'),
+                            's_t0': data.get('s_t0'),
+                        }
+                        flattened_data.append(flattened_record)
+        
+        # Convert to DataFrame
+        pm25_df = pd.DataFrame(flattened_data)
+        return pm25_df
     
     @task
-    def turn_df_into_table(duckdb_conn_id: str, pm25_table: str, pm25_data: pd.DataFrame):
+    def turn_df_into_table(duckdb_conn_id: str, pm25_table_name: str, pm25_df: pd.DataFrame):
         """
         Load it into DuckDB.
         Args:
@@ -122,9 +124,9 @@ def extract_device_id_airbox():
         # Load DataFrame into DuckDB
         # Create empty table with correct schema
         cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {pm25_table} AS SELECT * FROM pm25_df LIMIT 0")  
+            f"CREATE TABLE IF NOT EXISTS {pm25_table_name} AS SELECT * FROM pm25_df LIMIT 0")  
         cursor.execute(
-            "INSERT INTO {table} SELECT * FROM pm25_df", {'table': pm25_table})
+            "INSERT INTO {table} SELECT * FROM pm25_df", {'table': pm25_table_name})
 
         # Close the cursor
         cursor.close()
@@ -137,17 +139,14 @@ def extract_device_id_airbox():
     # Get data from this device
     pm25_data = get_pm25_data(device_ids)
 
-    # Convert json to df 
+    # Convert json to df and keep needed columns
     pm25_df = flatten_json_to_df(pm25_data)
 
     # Insert into database
     turn_df_into_table(
         duckdb_conn_id=gv.CONN_ID_DUCKDB,
-        pm25_table='pm25_data_table',
-        pm25_data=pm25_df
+        pm25_table_name='pm25_data_table',
+        pm25_df=pm25_df
     )
 
-    # Set up the task dependencies
-    device_ids_task >> pm25_data_task >> pm25_df_task >> turn_df_into_table_task
-
-extract_device_id_airbox()
+extract_pm25_to_db()
