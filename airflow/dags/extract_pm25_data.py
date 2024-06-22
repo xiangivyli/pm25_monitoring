@@ -24,7 +24,7 @@ from include.api_request import (
 # Datasets #
 # -------- #
 
-start_dataset = Dataset("duckdb_pm25")
+start_dataset = Dataset("start")
 
 # --- #
 # DAG #
