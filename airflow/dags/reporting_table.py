@@ -8,7 +8,7 @@ from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 from pendulum import datetime
 
-import duckdb_provider.hooks.duckdb_hook import DuckDBHook
+from duckdb_provider.hooks.duckdb_hook import DuckDBHook
 
 
 # -------------------- #
@@ -37,20 +37,21 @@ from include.global_variables import airflow_conf_variables as gv
 )
 def reporting_table():
     @task
-    def calcualte_daily_stats(
-        conn_str: str, source_table: str, dest_table: str):
+    def calculate_daily_stats(
+        conn_id: str, source_table: str, dest_table: str):
         """
         Query DuckDB to calculate daily statistics and store in a new table
         Args:
-            conn_str (str): path to the DuckDB database file.
+            conn_id (str): default DuckDB connection.
             source_table (str): the name of table to be queried
             dest_table (str): the name of table to be created"""
         
         # Connect to DuckDB
-        conn = duckdb.connect(conn_str)
+        my_duck_hook = DuckDBHook.get_hook(conn_id)
+        conn = my_duck_hook.get_conn()
 
         # Query to calculate daily statistics
-        query = f"""
+        combined_query = f"""
         SELECT 
            device_id,
            date,
@@ -71,25 +72,26 @@ def reporting_table():
         conn.close()
 
     # Run this task
-    calcualte_daily_stats(
-        conn_str=gv.DB_PATH,
+    calculate_daily_stats(
+        conn_id=gv.CONN_ID_DUCKDB,
         source_table=gv.RAW_DUCKDB_PM,
         dest_table=gv.REPORTING_DUCKDB_PM
     )
     
     @task
     def list_danger_time(
-        conn_str: str, source_table: str, dest_table: str):
+        conn_id: str, source_table: str, dest_table: str):
         """
         Query DuckDB to calculate average value for each time point,
         and list dangerous time which is above 30
         Args:
-            conn_str (str): path to the DuckDB database file.
+            conn_id (str): default DuckDB connection.
             source_table (str): the name of table to be queried
             dest_table (str): the name of table to be created"""
     
         # Connect to DuckDB
-        conn = duckdb.connect(conn_str)
+        my_duck_hook = DuckDBHook.get_hook(conn_id)
+        conn = my_duck_hook.get_conn()
 
         # Query to find time when average s_d is above 30
         danger_query = f"""
@@ -112,7 +114,7 @@ def reporting_table():
 
     # Run this task
     list_danger_time(
-        conn_str=gv.DB_PATH,
+        conn_id=gv.CONN_ID_DUCKDB,
         source_table=gv.RAW_DUCKDB_PM,
         dest_table=gv.DANGER_TIME_LIST
     )

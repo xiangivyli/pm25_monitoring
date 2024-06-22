@@ -160,7 +160,7 @@ def extract_pm25_to_db():
 
     # Insert into database
     turn_df_into_table(
-        conn_str=gv.DB_PATH
+        conn_str=gv.DB_PATH,
         pm25_table_name=gv.RAW_DUCKDB_PM,
         pm25_df=pm25_df
     )
