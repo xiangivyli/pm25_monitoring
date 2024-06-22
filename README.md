@@ -15,7 +15,7 @@ In this program, a final report shows
 - make sure the level is over 30 for the list of time
 - datatype keeps the same
 - no duplicate records
-5. **Data Reporting**: Power BI visualises the report-ready data and delivers insights
+5. **Data Reporting**: Streamlit visualises the report-ready data and delivers insights
 
 ## Infrastructure
 Used Techniques are:
@@ -23,6 +23,38 @@ Used Techniques are:
 - Get data from API: Python
 - Data storage: DuckDB
 - Data transformation + test: dbt
+
+## Table of Contents
+- [Highlights of this project](#highlights-of-this-project)
+- [Project Structure](project-structure)
+- [How to run it](#how-to-run-it)
+- [Overview of the pipeline](#overview-of-the-pipeline)
+
+## Highlights of this project
+1. Airflow **orchestrates** the pipeline, benefits include **visulise** the whole process, store historical **logs**, **scale** the workload, **schedule** running time (i.e., daily), etc
+2. Airflow **stages** data processing, from data extraction, data transformation to data reporting, splits the whole into small controllable micro-pieces
+3. Docker compose **containerises** the running environment (i.e., dependencies)
+
+## Project Structure
+```graphql
+├── README.md #this file
+└── airflow  # airflow folder including all functions and pipelines
+    ├── Dockerfile
+    ├── README.md
+    ├── dags  # pipelines in this folder
+    │   ├── exampledag.py
+    │   ├── extract_current_pm_data.py
+    │   └── start_db_pool.py 
+    ├── include # customised functions and defined variables
+    │   └── global_variables
+    │       ├── airflow_conf_variables.py
+    │       └── constants.py
+    ├── packages.txt
+    ├── requirements.txt # required packages
+    └── tests
+        └── dags
+            └── test_dag_example.py
+```
 
 ## How to run it
 ### Option 1 Ubuntu 20.04 (Linux environment)
@@ -77,7 +109,11 @@ winget install -e --id Astronomer.Astro
 5. View the streamlit app at `localhost:8501`.
 
   
-
+## Overview of this project
+There are 4 `dag`s in the whole process
+- DAG 1 start_db_pool, set a pool for scaling the worker to avoid overloading
+- DAG 2 extract_current_pm_data, 
+- DAG 3 
 
 
 
