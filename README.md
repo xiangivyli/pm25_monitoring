@@ -39,8 +39,8 @@ Used Techniques are:
 ## Highlights of this project
 1. Airflow **orchestrates** the pipeline, benefits include **visulise** the whole process, store historical **logs**, **scale** the workload, **schedule** running time (i.e., daily), etc
 2. Airflow **stages** data processing, from data extraction, data transformation to data reporting, splits the whole into small controllable micro-pieces
-3. DuckDB stores data and performs transformation
-4. Docker compose **containerises** the running environment (i.e., dependencies)
+3. DuckDB stores data and performs transformation, and Airflow adds test tasks to control data quality
+4. Docker Compose **containerises** the running environment (i.e., dependencies)
 
 ## Project Structure
 ```graphql
