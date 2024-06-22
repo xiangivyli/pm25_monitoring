@@ -61,13 +61,20 @@ Used Techniques are:
 ```
 
 ## How to run it
+### Option 0 Codespaces (Strongly Recommend! Do not need local environment)
+- Step 0 Fork this repository into your own GitHub
+- Step 1 Create codespaces with 4-code Machine Type, choose it from New with options (otherwise docker is slow)
+
+
 ### Option 1 Ubuntu 20.04 (Linux environment)
 #### Getting Start
-- Step 1 Install **Astro Cli**
-```bash
-curl -sSL install.astronomer.io | sudo bash -s
-```
-- **Step 2 Create a Python virtual environment and activate it**
+- Step 0 Clone this repository:
+   ```bash
+   git clone https://github.com/xiangivyli/pm25_monitoring.git
+   cd pm25_monitoring
+   ```
+
+- **Step 1 Create a Python virtual environment and activate it**
 ```bash
 cd airflow/
 # Setup Python, install python3-venv package
@@ -77,6 +84,9 @@ sudo apt-get install python3-venv
 python3 -m venv .venv
 source .venv/bin/activate
 ```
+- Step 2 Install **Astro Cli**
+```bash
+curl -sSL install.astronomer.io | sudo bash -s
 
 - **Step 3 Start the containers to run Airflow**
 ```bash
