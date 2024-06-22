@@ -4,10 +4,19 @@ In this program, a final report shows
 - a list of times when the level is above the danger threshold of 30
 - the daily maximum, daily minimum, and daily average pollution value
 
-## Data Source: [PM25 Open Data API](#https://app.swaggerhub.com/apis-docs/I2875/PM25_Open_Data/1.0.0#/Device/get_Device_Latest)
-## Project: airbox 
+## Table of Contents
+- [Abstract](#abstract)
+- [Highlights of this project](#highlights-of-this-project)
+- [Project Structure](project-structure)
+- [How to run it](#how-to-run-it)
+- [Overview of the pipeline](#overview-of-the-pipeline)
 
-## The workflow is
+## **Abstract**
+
+### Data Source: [PM25 Open Data API](#https://app.swaggerhub.com/apis-docs/I2875/PM25_Open_Data/1.0.0#/Device/get_Device_Latest)
+### Project: airbox 
+
+### The workflow is
 1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint
 2. **Data Backup**: save the raw data into SQLite with the appropriate schema
 3. **Data Transformation**: 
@@ -20,18 +29,12 @@ In this program, a final report shows
 - no duplicate records
 5. **Data Reporting**: Streamlit visualises the report-ready data and delivers insights
 
-## Infrastructure
+### Infrastructure
 Used Techniques are:
 - Data Orchestration + Containerization: Astro CLI (Apache Airflow + Docker Compose)
 - Get data from API: Python
 - Data storage and transformation: DuckDB
 - Data visualisation: Streamlit
-
-## Table of Contents
-- [Highlights of this project](#highlights-of-this-project)
-- [Project Structure](project-structure)
-- [How to run it](#how-to-run-it)
-- [Overview of the pipeline](#overview-of-the-pipeline)
 
 ## Highlights of this project
 1. Airflow **orchestrates** the pipeline, benefits include **visulise** the whole process, store historical **logs**, **scale** the workload, **schedule** running time (i.e., daily), etc
