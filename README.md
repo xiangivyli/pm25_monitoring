@@ -144,15 +144,19 @@ winget install -e --id Astronomer.Astro
 
   
 ## Overview of this project
-There are 3 `dag`s in the whole process, connected by dataset
+There are 3 `dag`s in the whole process, connected by datasets
+
 ![dependency](src/dependency.png)
-### DAG 1 extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
+
+- **DAG 1** extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
         schedule: daily, run once at midnight 
 ![dag1](src/dag1.png)
-### DAG 2 reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30
+
+- **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30
         schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once
 ![dag2](src/dag2.png)
-### DAG 3 dashboarding, visualise data
+
+- **DAG 3** dashboarding, visualise data
         schedule: triggered by dag 2, as long as dag 2 run, update the report once
 
 
