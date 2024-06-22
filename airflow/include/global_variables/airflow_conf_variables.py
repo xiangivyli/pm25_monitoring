@@ -4,8 +4,6 @@
 
 from airflow import Dataset
 from pendulum import duration
-import json
-import os
 
 # ----------------------- #
 # Configuration variables #
@@ -21,8 +19,11 @@ api_url = "https://pm25.lass-net.org/API-1.0.0/project/airbox/latest/"
 device_IDs = ["74DA38F7C4B0"]
 
 # DuckDB config
-CONN_ID_DUCKDB = "duckdb_default"
-DUCKDB_INSTANCE_NAME = json.loads(os.environ["AIRFLOW_CONN_DUCKDB_DEFAULT"])["host"]
+DB_PATH = "include/pm25_ducks.db"
+CONN_ID_DUCKDB = "my_local_duckdb_conn"
+RAW_DUCKDB_PM = "pm25_data_table"
+REPORTING_DUCKDB_PM = "combined_daily_pm25_stats"
+DANGER_TIME_LIST = "danger_time_list"
 
 # DAG default arguments
 default_args = {

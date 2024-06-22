@@ -8,13 +8,14 @@ from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 from pendulum import datetime
 import pandas as pd
+import duckdb
 #import random
+
 # -------------------- #
 # Local module imports #
 # -------------------- #
 
 from include.global_variables import airflow_conf_variables as gv
-from include.global_variables import constants as c
 from include.api_request import (
     #fetch_device_ids,
     get_last_7_days_pm25,
@@ -36,7 +37,7 @@ start_dataset = Dataset("start")
     schedule=[start_dataset],
     catchup=False,
     default_args=gv.default_args,
-    description="DAG that retrieves device id from airbox project and saves it to a list.",
+    description="DAG that extracts data from api and store in DuckDB.",
     tags=["step2"]
 )
 def extract_pm25_to_db():
@@ -107,31 +108,46 @@ def extract_pm25_to_db():
         return pm25_df
     
     @task
-    def turn_df_into_table(duckdb_conn_id: str, pm25_table_name: str, pm25_df: pd.DataFrame):
+    def turn_df_into_table(
+        conn_str: str, pm25_table_name: str, pm25_df: pd.DataFrame):
         """
         Load it into DuckDB.
         Args:
-            duckdb_conn_id (str): The connection ID for the DuckDB connection.
-            pm25_table (str): The name of the table to be created in DuckDB.
-            pm25_data (pd.DataFrame): The DataFrame input to be loaded into DuckDB.
-        """
-        from duckdb_provider.hooks.duckdb_hook import DuckDBHook
+           conn_str (str): path to the DuckDB database file.
+           pm25_table_name (str): the name of the table to be created in DuckDB.
+           pm25_df (pd.DataFrame): the DataFrame to be loaded into DuckDB"""
 
         # Connect to DuckDB
-        duckdb_conn = DuckDBHook(duckdb_conn_id).get_conn()
-        cursor = duckdb_conn.cursor()
+        conn = duckdb.connect(conn_str)
+        cursor = conn.cursor()
 
-        # Load DataFrame into DuckDB
         # Create empty table with correct schema
-        cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {pm25_table_name} AS SELECT * FROM pm25_df LIMIT 0")  
-        cursor.execute(
-            "INSERT INTO {table} SELECT * FROM pm25_df", {'table': pm25_table_name})
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS {pm25_table_name} (
+            device_id TEXT,
+            source TEXT,
+            timestamp TIMESTAMP,
+            date DATE,
+            gps_lat DOUBLE,
+            gps_lon DOUBLE,
+            s_d0 DOUBLE,
+            s_d1 DOUBLE,
+            s_d2 DOUBLE,
+            s_h0 DOUBLE,
+            s_t0 DOUBLE
+        );
+        """
+        cursor.execute(create_table_query)
 
-        # Close the cursor
+        # Insert data into DuckDB table
+        cursor.register("pm25_df_view", pm25_df)
+        insert_query = f"INSERT INTO {pm25_table_name} SELECT * FROM pm25_df_view"
+        cursor.execute(insert_query)
+    
+        # Commit the transaction and close the cursor
+        conn.commit()
         cursor.close()
-
-
+        conn.close()
     
     # Choose one device ID
     device_ids = gv.device_IDs
@@ -144,9 +160,11 @@ def extract_pm25_to_db():
 
     # Insert into database
     turn_df_into_table(
-        duckdb_conn_id=gv.CONN_ID_DUCKDB,
-        pm25_table_name='pm25_data_table',
+        conn_str=gv.DB_PATH
+        pm25_table_name=gv.RAW_DUCKDB_PM,
         pm25_df=pm25_df
     )
+
+
 
 extract_pm25_to_db()

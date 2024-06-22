@@ -142,9 +142,12 @@ winget install -e --id Astronomer.Astro
   
 ## Overview of this project
 There are 4 `dag`s in the whole process
-- DAG 1 start_db_pool, set a pool for scaling the worker to avoid overloading
-- DAG 2 extract_current_pm_data, 
-- DAG 3 
+- DAG 1 start_db_pool, starting point and set a pool for scaling the worker to avoid overloading
+- DAG 2 extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB 
+- DAG 3 reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30
+- DAG 4 dashboarding, visualise data
+
+
 
 
 
