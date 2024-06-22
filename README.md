@@ -4,6 +4,8 @@ In this program, a final report shows
 - a list of times when the level is above the danger threshold of 30
 - the daily maximum, daily minimum, and daily average pollution value
 
+## Data Source: [PM25 Open Data API](#https://app.swaggerhub.com/apis-docs/I2875/PM25_Open_Data/1.0.0#/Device/get_Device_Latest)
+
 ## The workflow is
 1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint
 2. **Data Backup**: save the raw data into SQLite with the appropriate schema
