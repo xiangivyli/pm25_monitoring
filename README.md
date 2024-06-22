@@ -13,12 +13,12 @@ In this program, a final report shows
 
 ## **Abstract**
 
-### Data Source: [PM25 Open Data API](#https://app.swaggerhub.com/apis-docs/I2875/PM25_Open_Data/1.0.0#/Device/get_Device_Latest)
+### Data Source: [PM25 Open Data API](https://app.swaggerhub.com/apis-docs/I2875/PM25_Open_Data/1.0.0#/Device/get_Device_Latest)
 ### Project: airbox 
 
 ### The workflow is
 1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint
-2. **Data Backup**: save the raw data into SQLite with the appropriate schema
+2. **Data Backup**: save the raw data into DuckDB with the appropriate schema
 3. **Data Transformation**: 
 - Keep the report-needed columns
 - Generate the list of times when PM2.5 is over 30
@@ -39,8 +39,8 @@ Used Techniques are:
 ## Highlights of this project
 1. Airflow **orchestrates** the pipeline, benefits include **visulise** the whole process, store historical **logs**, **scale** the workload, **schedule** running time (i.e., daily), etc
 2. Airflow **stages** data processing, from data extraction, data transformation to data reporting, splits the whole into small controllable micro-pieces
-3. DuckDB stores data and performs transformation
-4. Docker compose **containerises** the running environment (i.e., dependencies)
+3. DuckDB stores data and performs transformation, and Airflow adds test tasks to control data quality
+4. Docker Compose **containerises** the running environment (i.e., dependencies)
 
 ## Project Structure
 ```graphql
