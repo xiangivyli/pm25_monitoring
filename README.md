@@ -64,7 +64,23 @@ Used Techniques are:
 ### Option 0 Codespaces (Strongly Recommend! Do not need local environment)
 - Step 0 Fork this repository into your own GitHub
 - Step 1 Create codespaces with 4-code Machine Type, choose it from New with options (otherwise docker is slow)
-
+![codespaces-creation](src/fork_and_codespaces.png)
+- Step 2 Create a Python virtual environment and activate it
+```bash
+cd airflow/
+python3 -m venv .venv
+source .venv/bin/activate
+```
+- Step 3 Install **Astro Cli**
+```bash
+curl -sSL install.astronomer.io | sudo bash -s
+```
+- Step 4 **Step 3 Start the containers to run Airflow**
+```bash
+astro dev start
+```
+- Go to port 8080 to check the data pipeline in the UI
+URL: http://localhost:8080
 
 ### Option 1 Ubuntu 20.04 (Linux environment)
 #### Getting Start
@@ -87,6 +103,7 @@ source .venv/bin/activate
 - Step 2 Install **Astro Cli**
 ```bash
 curl -sSL install.astronomer.io | sudo bash -s
+```
 
 - **Step 3 Start the containers to run Airflow**
 ```bash
