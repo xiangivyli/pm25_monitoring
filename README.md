@@ -24,8 +24,8 @@ In this program, a final report shows
 Used Techniques are:
 - Data Orchestration + Containerization: Astro CLI (Apache Airflow + Docker Compose)
 - Get data from API: Python
-- Data storage: DuckDB
-- Data transformation + test: dbt
+- Data storage and transformation: DuckDB
+- Data visualisation: Streamlit
 
 ## Table of Contents
 - [Highlights of this project](#highlights-of-this-project)
@@ -36,7 +36,8 @@ Used Techniques are:
 ## Highlights of this project
 1. Airflow **orchestrates** the pipeline, benefits include **visulise** the whole process, store historical **logs**, **scale** the workload, **schedule** running time (i.e., daily), etc
 2. Airflow **stages** data processing, from data extraction, data transformation to data reporting, splits the whole into small controllable micro-pieces
-3. Docker compose **containerises** the running environment (i.e., dependencies)
+3. DuckDB stores data and performs transformation
+4. Docker compose **containerises** the running environment (i.e., dependencies)
 
 ## Project Structure
 ```graphql

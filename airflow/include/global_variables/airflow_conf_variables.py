@@ -12,6 +12,15 @@ from pendulum import duration
 # Datasets
 DS_START = Dataset("start")
 
+# API URL
+api_url = "https://pm25.lass-net.org/API-1.0.0/project/airbox/latest/"
+
+# device id
+device_IDs = ["74DA38F7C4B0"]
+
+# DuckDB config
+CONN_ID_DUCKDB = "duckdb_default"
+DUCKDB_INSTANCE_NAME = json.loads(os.environ["AIRFLOW_CONN_DUCKDB_DEFAULT"])["host"]
 
 # DAG default arguments
 default_args = {

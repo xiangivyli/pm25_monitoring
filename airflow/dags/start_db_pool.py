@@ -16,7 +16,7 @@ from include.global_variables import airflow_conf_variables as gv
 # Datasets #
 # -------- #
 
-start_dataset = Dataset("duckdb_pm25")
+start_dataset = Dataset("start")
 
 # --- #
 # DAG #

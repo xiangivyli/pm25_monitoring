@@ -62,12 +62,10 @@ def extract_device_id_airbox():
     
         raise ValueError("No devices with valid timestamps found.")
     """
-    
-    # use the /device/<device_id>/history/ endpoint to extract pm25 information
+
     @task
     def get_pm25_data(device_ids):
-        """use the 'get_last_7_days_pm25' function from the local 'meterology_utils'
-        module to retrieve the last 7 days data which updated 5 mins"""
+        """Retrieve the last 7 days of PM2.5 data for each device ID."""
         all_device_data = []
         for device_id in device_ids:
             device_data = get_last_7_days_pm25(device_id)
@@ -75,68 +73,81 @@ def extract_device_id_airbox():
                 all_device_data.append(device_data)
         return all_device_data
 
-    # task to convert JSON to DataFrame
     @task
     def flatten_json_to_df(json_data):
-            flattened_data = []
-        
-            for record in json_data:
-                device_id = record.get('device_id')
-                source = record.get('source')
-                num_of_records = record.get('num_of_records')
-                
-                for feed in record.get('feeds', []):
-                    for airbox in feed.get('AirBox', []):
-                        for timestamp, data in airbox.items():
-                            flattened_record = {
-                                'device_id': device_id,
-                                'source': source,
-                                'num_of_records': num_of_records,
-                                'timestamp': timestamp
-                            }
-                            flattened_record.update(data)
-                            flattened_data.append(flattened_record)
-            # convert to dataframe
-            df = pd.DataFrame(flattened_data)
-            return df
+        """Flatten JSON data and convert it to a pandas DataFrame."""
+       flattened_data = []
+   
+       for record in json_data:
+           device_id = record.get('device_id')
+           source = record.get('source')
+           
+           for feed in record.get('feeds', []):
+               for airbox in feed.get('AirBox', []):
+                   for timestamp, data in airbox.items():
+                       flattened_record = {
+                           'device_id': device_id,
+                           'source': source,
+                           'timestamp': timestamp,
+                           'date': data.get('date'),
+                           'gps_lat': data.get('gps_lat'),
+                           'gps_lon': data.get('gps_lon'),
+                           's_d0': data.get('s_d0'),
+                           's_d1': data.get('s_d1'),
+                           's_d2': data.get('s_d2'),
+                           's_h0': data.get('s_h0'),
+                           's_t0': data.get('s_t0'),
+                       }
+                       flattened_data.append(flattened_record)
+       
+       # Convert to DataFrame
+       df = pd.DataFrame(flattened_data)
+       return df
     
-    
-    
-    # insert into DuckDB
     @task
-    def turn_df_into_table(
-        duckdb_conn_id: str, pm25_table_name: str, pm25_data: list
-        ):
+    def turn_df_into_table(duckdb_conn_id: str, pm25_table: str, pm25_data: pd.DataFrame):
         """
-        Convert the JSON input with info about the current weather into a pandas
-        DataFrame and load it into DuckDB.
+        Load it into DuckDB.
         Args:
             duckdb_conn_id (str): The connection ID for the DuckDB connection.
-            pm25_table_name (str): The name of the table to be created in DuckDB.
-            pm25_data (list): The JSON input to be loaded into DuckDB.
+            pm25_table (str): The name of the table to be created in DuckDB.
+            pm25_data (pd.DataFrame): The DataFrame input to be loaded into DuckDB.
         """
         from duckdb_provider.hooks.duckdb_hook import DuckDBHook
 
+        # Connect to DuckDB
         duckdb_conn = DuckDBHook(duckdb_conn_id).get_conn()
         cursor = duckdb_conn.cursor()
-        cursor.sql(
-            f"CREATE TABLE IF NOT EXISTS {pm25_table_name} AS SELECT * FROM pm25_df"
-        )
-        cursor.sql(
-            f"INSERT INTO {pm25_table_name} SELECT * FROM pm25_df"
-        )
+
+        # Load DataFrame into DuckDB
+        # Create empty table with correct schema
+        cursor.execute(
+            f"CREATE TABLE IF NOT EXISTS {pm25_table} AS SELECT * FROM pm25_df LIMIT 0")  
+        cursor.execute(
+            "INSERT INTO {table} SELECT * FROM pm25_df", {'table': pm25_table})
+
+        # Close the cursor
         cursor.close()
 
 
-    api_url = "https://pm25.lass-net.org/API-1.0.0/project/airbox/latest/"
+    
     # Choose one device ID
-    device_ids = ["74DA38F7C4B0"]
+    device_ids = gv.device_IDs
+
     # Get data from this device
     pm25_data = get_pm25_data(device_ids)
-    turn_json_into_table(
+
+    # Convert json to df 
+    pm25_df = flatten_json_to_df(pm25_data)
+
+    # Insert into database
+    turn_df_into_table(
         duckdb_conn_id=gv.CONN_ID_DUCKDB,
-        pm25_table_name='pm25_data_table',
-        pm25_data=pm25_data
+        pm25_table='pm25_data_table',
+        pm25_data=pm25_df
     )
+
+    # Set up the task dependencies
+    device_ids_task >> pm25_data_task >> pm25_df_task >> turn_df_into_table_task
 
 extract_device_id_airbox()
