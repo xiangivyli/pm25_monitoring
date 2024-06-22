@@ -21,7 +21,7 @@ from include.global_variables import airflow_conf_variables as gv
 # Datasets #
 # -------- #
 
-
+Upstream_Dataset = Dataset("duckdb://include/pm25_raw")
 
 # --- #
 # DAG #
@@ -29,14 +29,16 @@ from include.global_variables import airflow_conf_variables as gv
 
 @dag(
     start_date=days_ago(1),
-    schedule=None,
+    schedule=[Upstream_Dataset],
     catchup=False,
     default_args=gv.default_args,
-    description="DAG that aggregates data from pm25_data_table.",
-    tags=["step3", "duckdb"]
+    description="DAG that aggregates data from pm25_data_table",
+    tags=["step2", "duckdb"]
 )
 def reporting_table():
-    @task
+    @task(
+           pool="duckdb", outlets=[Dataset("duckdb://include/pm25_report")]
+    )
     def calculate_daily_stats(
         conn_id: str, source_table: str, dest_table: str):
         """

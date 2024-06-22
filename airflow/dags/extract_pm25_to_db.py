@@ -5,11 +5,11 @@
 
 from airflow import Dataset
 from airflow.decorators import dag, task
-from airflow.utils.dates import days_ago
 from pendulum import datetime
 import pandas as pd
 import duckdb
 #import random
+from airflow.operators.bash import BashOperator
 
 # -------------------- #
 # Local module imports #
@@ -21,24 +21,19 @@ from include.api_request import (
     get_last_7_days_pm25,
 )
 
-# -------- #
-# Datasets #
-# -------- #
-
-start_dataset = Dataset("start")
 
 # --- #
 # DAG #
 # --- #
 
 @dag(
-    start_date=days_ago(1),
-    # this DAG runs as soon as the "duckdb_pm25" Dataset has been produced to
-    schedule=[start_dataset],
+    start_date=datetime(2024, 6, 20),
+    # this DAG runs once after unpaused, then run once at midnight
+    schedule="@daily",
     catchup=False,
     default_args=gv.default_args,
     description="DAG that extracts data from api and store in DuckDB.",
-    tags=["step2"]
+    tags=["step1", "api", "device_id", "duckdb"]
 )
 def extract_pm25_to_db():
 
@@ -107,7 +102,9 @@ def extract_pm25_to_db():
         pm25_df = pd.DataFrame(flattened_data)
         return pm25_df
     
-    @task
+    @task(
+        pool="duckdb", outlets=[Dataset("duckdb://include/pm25_raw")]
+    )
     def turn_df_into_table(
         conn_str: str, pm25_table_name: str, pm25_df: pd.DataFrame):
         """
@@ -165,6 +162,13 @@ def extract_pm25_to_db():
         pm25_df=pm25_df
     )
 
-
+    # This task uses the BashOperator to run a bash command creating an Airflow
+    # pool called 'duckdb' which contains one worker slot. All tasks running
+    # queries against DuckDB will be assigned to this pool, preventing parallel
+    # requests to DuckDB.
+    create_duckdb_pool = BashOperator(
+        task_id="create_duckdb_pool",
+        bash_command="airflow pools list | grep -q 'duckdb' || airflow pools set duckdb 1 'Pool for duckdb'"
+    )
 
 extract_pm25_to_db()

@@ -3,3 +3,4 @@
 pandas==1.5.3
 duckdb==0.7.1
 airflow-provider-duckdb==0.1.0
+streamlit==1.23.0
