@@ -150,17 +150,19 @@ There are 3 `dag`s in the whole process, connected by datasets
 </div>
 
 - **DAG 1** extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
+
         Key points:
-        1.**schedule: daily, run once at midnight** 
-        2.**Filter out exsiting records when update**
-        3.**Monitor data quailty without duplicate records and correct timestamp datatype**
+        1. **schedule: daily, run once at midnight** 
+        2. **Filter out exsiting records when update**
+        3. **Monitor data quailty without duplicate records and correct timestamp datatype**
 ![dag1](src/dag1.png)
 
 - **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30,
+
         Key points:
-        1.**schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once**
-        2.**Every run will generate a brand-new time list and a daily value table**
-        3.**Transformation run in a pool to prevent parallel requests to duckdb** 
+        1. **schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once**
+        2. **Every run will generate a brand-new time list and a daily value table**
+        3. **Transformation run in a pool to prevent parallel requests to duckdb** 
 ![dag2](src/dag2.png)
 
 - **DAG 3** dashboarding, visualise data
