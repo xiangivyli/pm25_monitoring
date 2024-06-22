@@ -68,7 +68,7 @@ def reporting_table():
         combined_daily_stats_df = conn.execute(combined_query).fetchdf()
 
         # Create a new table with the combined results
-        conn.execute(f"CREATE TABLE IF NOT EXISTS {dest_table} AS SELECT * FROM combined_daily_stats_df")
+        conn.execute(f"CREATE OR REPLACE TABLE {dest_table} AS SELECT * FROM combined_daily_stats_df")
 
         # Close the connection
         conn.close()
@@ -109,8 +109,8 @@ def reporting_table():
         danger_times_df = conn.execute(danger_query).fetchdf()
 
         # Save the danger times to a new table
-        conn.execute(f"CREATE TABLE IF NOT EXISTS danger_times AS SELECT * FROM danger_times_df")
-
+        conn.execute(f"CREATE OR REPLACE TABLE {dest_table} AS SELECT * FROM danger_times_df")
+        
         # Close the connection
         conn.close()
 

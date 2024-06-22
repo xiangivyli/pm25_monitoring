@@ -9,9 +9,6 @@ from pendulum import duration
 # Configuration variables #
 # ----------------------- #
 
-# Datasets
-DS_START = Dataset("start")
-
 # API URL
 api_url = "https://pm25.lass-net.org/API-1.0.0/project/airbox/latest/"
 
