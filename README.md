@@ -145,8 +145,9 @@ winget install -e --id Astronomer.Astro
   
 ## Overview of this project
 There are 3 `dag`s in the whole process, connected by datasets
-
-![dependency](src/dependency.png)
+<div align="center">
+  <img src="src/dependency.png">
+</div>
 
 - **DAG 1** extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
         schedule: daily, run once at midnight 
