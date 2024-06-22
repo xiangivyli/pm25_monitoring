@@ -18,7 +18,7 @@ In this program, a final report shows
 
 ### The workflow is
 1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint
-2. **Data Backup**: save the raw data into SQLite with the appropriate schema
+2. **Data Backup**: save the raw data into DuckDB with the appropriate schema
 3. **Data Transformation**: 
 - Keep the report-needed columns
 - Generate the list of times when PM2.5 is over 30
