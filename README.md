@@ -21,7 +21,7 @@ In this program, a final report shows
 2. **Data Backup**: save the raw data into DuckDB with the appropriate schema
 3. **Data Transformation**: 
 - Keep the report-needed columns
-- - Calculate the daily maximum, daily minimum, and daily average pollution value
+- Calculate the daily maximum, daily minimum, and daily average pollution value
 - Generate the list of times when PM2.5 is over 30 (I used 22 as an example here, otherwise no values show)
 4. **Data Validation**:
 - no duplicate records
