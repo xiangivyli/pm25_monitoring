@@ -1,8 +1,8 @@
 # PM2.5 Monitoring Program
 
 In this program, a final report shows 
-- a list of times when the level is above the danger threshold of 30 (I used 22 here as an example)
 - the daily maximum, daily minimum, and daily average pollution value
+- a list of times when the level is above the danger threshold of 30 (I used 22 here as an example)
 
 ## Table of Contents
 - [Abstract](#abstract)
@@ -17,15 +17,15 @@ In this program, a final report shows
 ### Project: airbox 
 
 ### The workflow is
-1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint
+1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint (I tried to generate the device_id list from project endpoint)
 2. **Data Backup**: save the raw data into DuckDB with the appropriate schema
 3. **Data Transformation**: 
 - Keep the report-needed columns
+- - Calculate the daily maximum, daily minimum, and daily average pollution value
 - Generate the list of times when PM2.5 is over 30 (I used 22 as an example here, otherwise no values show)
-- Calculate the daily maximum, daily minimum, and daily average pollution value
-4. **Data Validation**: 
-- datatype is correct
+4. **Data Validation**:
 - no duplicate records
+- datatype is correct
 5. **Data Reporting**: Streamlit visualises the report-ready data and delivers insights
 
 ### Infrastructure
