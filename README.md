@@ -97,6 +97,12 @@ astro dev start
 - Go to port 8080 to check the data pipeline in the UI
 URL: http://localhost:8080
 
+Unpause these dags, they will start to run once, until dag1 is set to run daily, dag2 for transformation is set to run triggered by dag1
+![airflow_ui](src/airflow_ui.png)
+
+- Go to port 8501 to monitor the current status of database
+URL: http://localhost:8501
+
 ### Option 1 Ubuntu 20.04 (Linux environment)
 #### Getting Start
 - Step 0 Clone this repository:
@@ -128,6 +134,8 @@ astro dev start
 - Go to port 8080 to check the data pipeline in the UI
 URL: http://localhost:8080
 
+- Go to port 8501 to monitor the current status of database
+URL: http://localhost:8501
 ### Option 2 Local Run, Git Bash (Windows environment)
 #### Prerequisites
 1. Docker (Link: https://docs.docker.com/get-docker/)
