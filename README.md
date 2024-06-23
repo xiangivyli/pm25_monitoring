@@ -90,7 +90,7 @@ source .venv/bin/activate
 ```bash
 curl -sSL install.astronomer.io | sudo bash -s
 ```
-- Step 4 **Step 3 Start the containers to run Airflow**
+- **Step 4 Start the containers to run Airflow**
 ```bash
 astro dev start
 ```
