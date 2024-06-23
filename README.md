@@ -45,22 +45,34 @@ Used Techniques are:
 ## Project Structure
 ```graphql
 ├── README.md #this file
-└── airflow  # airflow folder including all functions and pipelines
-    ├── Dockerfile
-    ├── README.md
-    ├── dags  # pipelines in this folder
-    │   ├── exampledag.py
-    │   ├── extract_current_pm_data.py
-    │   └── start_db_pool.py 
-    ├── include # customised functions and defined variables
-    │   └── global_variables
-    │       ├── airflow_conf_variables.py
-    │       └── constants.py
-    ├── packages.txt
-    ├── requirements.txt # required packages
-    └── tests
-        └── dags
-            └── test_dag_example.py
+├── abseil-cpp #library to support airflow-provider-duckdb package
+├── airflow
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── dags #all pipelines are defined in this folder
+│   │   ├── __pycache__
+│   │   ├── extract_pm25_to_db.py #step1
+│   │   ├── reporting_table.py #step2
+│   │   └── stream_run.py #step3
+│   ├── docker-compose.override.yml
+│   ├── include #all artifacts including database, global environment, local functions, streamlit app
+│   │   ├── __pycache__
+│   │   ├── api_request.py
+│   │   ├── global_variables
+│   │   ├── pm25_ducks.db #duckdb database
+│   │   ├── streamlit_app.py
+│   │   └── streamlit_container_requirements.txt
+│   ├── packages.txt
+│   ├── plugins
+│   ├── requirements.txt #list all dependencies
+│   └── tests
+│       └── dags
+└── src
+    ├── dag1.png
+    ├── dag2.png
+    ├── dependency.png
+    └── fork_and_codespaces.png
+
 ```
 
 ## How to run it
@@ -149,24 +161,27 @@ There are 3 `dag`s in the whole process, connected by datasets
   <img src="src/dependency.png">
 </div>
 
-- **DAG 1** extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
+**DAG 1** extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
 
-        Key points:
-        1. **schedule: daily, run once at midnight** 
-        2. **Filter out exsiting records when update**
-        3. **Monitor data quailty without duplicate records and correct timestamp datatype**
+Key points:
+1. **schedule: daily, run once at midnight** 
+2. **Filter out exsiting records when update**
+3. **Monitor data quailty without duplicate records and correct timestamp datatype**
 ![dag1](src/dag1.png)
 
-- **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30,
+ **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30,
 
-        Key points:
-        1. **schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once**
-        2. **Every run will generate a brand-new time list and a daily value table**
-        3. **Transformation run in a pool to prevent parallel requests to duckdb** 
+Key points:
+1. **schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once**
+2. **Every run will generate a brand-new time list and a daily value table**
+3. **Transformation run in a pool to prevent parallel requests to duckdb** 
 ![dag2](src/dag2.png)
 
-- **DAG 3** dashboarding, visualise data
-        schedule: triggered by dag 2, as long as dag 2 run, update the report once
+ **DAG 3** run_streamlit, dashboarding, visualise data
+        
+Key points:
+1. **schedule: triggered by dag 2, as long as dag 2 run, update the report once**
+2. **data source is pm25_ducks.db, streamlit_app.py design the report**
 
 
 
