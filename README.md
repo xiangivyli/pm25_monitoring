@@ -160,19 +160,19 @@ There are 3 `dag`s in the whole process, connected by datasets
   <img src="src/dependency.png">
 </div>
 
-**DAG 1** extract_pm25_to_db, get json data from api, convert it to dataframe and insert into DuckDB, 
+**DAG 1** extract_pm25_to_db, get JSON data from API, convert it to dataframe and insert into DuckDB, 
 
 Key points:
 1. **schedule: daily, run once at midnight** 
-2. **Filter out exsiting records when update, set (device_id, timestamp) is UNIQUE to avoid duplicates**
-3. **Monitor data quailty without duplicate records and correct timestamp datatype**
+2. **Filter out existing records when update, set (device_id, timestamp) is UNIQUE to avoid duplicates**
+3. **Monitor data quality without duplicate records and correct timestamp datatype**
 
 ![dag1](src/dag1.png)
 
- **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30 (I used 22 here as an example),
+ **DAG 2** reporting_table, generate the daily maximum, minimum, and average values, and detect the data beyond 30 (I used 22 here as an example),
 
 Key points:
-1. **schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once**
+1. **schedule: triggered by dag 1, as long as dag 1 runs, dag 2 runs once**
 2. **Every run will generate a brand-new time list and a daily value table**
 3. **Transformation run in a pool to prevent parallel requests to duckdb** 
 ![dag2](src/dag2.png)
@@ -180,14 +180,14 @@ Key points:
  **DAG 3** run_streamlit, dashboarding, visualise data
         
 Key points:
-1. **schedule: triggered by dag 2, as long as dag 2 run, update the report once**
+1. **schedule: triggered by dag 2, as long as dag 2 runs, update the report once**
 2. **data source is pm25_ducks.db, streamlit_app.py design the report**
 ![dag3](src/reports.png)
 
 ## Next step
 Deploy the program in the Cloud VM
 
-# Thanks for your time to check my project, any suggestions or questions are welcomed :)
+## Thanks for taking the time to check my project, any suggestions or questions are welcomed :)
 
 
 
