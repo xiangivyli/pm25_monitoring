@@ -53,16 +53,17 @@ Used Techniques are:
 │   │   ├── extract_pm25_to_db.py #step1
 │   │   ├── reporting_table.py #step2
 │   │   └── stream_run.py #step3
-│   ├── docker-compose.override.yml
 │   ├── include #all artifacts including database, global environment, local functions, streamlit app
 │   │   ├── __pycache__
 │   │   ├── api_request.py
 │   │   ├── global_variables
-│   │   ├── pm25_ducks.db #duckdb database
+│   │   ├── monitor_database.py
+│   │   ├── pm25_ducks.db
 │   │   ├── streamlit_app.py
-│   │   └── streamlit_container_requirements.txt
+│   │   └── test.py
 │   ├── packages.txt
 │   ├── plugins
+│   ├── pm25_ducks.db
 │   ├── requirements.txt #list all dependencies
 │   └── tests
 │       └── dags
@@ -70,8 +71,8 @@ Used Techniques are:
     ├── dag1.png
     ├── dag2.png
     ├── dependency.png
-    └── fork_and_codespaces.png
-
+    ├── fork_and_codespaces.png
+    └── reports.png
 ```
 
 ## How to run it
