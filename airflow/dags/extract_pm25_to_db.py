@@ -75,29 +75,33 @@ def extract_pm25_to_db():
     def flatten_json_to_df(all_device_data):
         """Flatten JSON data, keep needed columns and convert it to a pandas DataFrame."""
         flattened_data = []
-   
+    
         for record in all_device_data:
             device_id = record.get('device_id')
             source = record.get('source')
             
-            for feed in record.get('feeds', []):
+            feeds = record.get('feeds', [])
+            for feed in feeds:
                 airbox_entries = feed.get('AirBox', [])
                 for airbox in airbox_entries:
-                    timestamp = airbox.get('time')
-                    flattened_record = {
-                        'device_id': device_id,
-                        'source': source,
-                        'timestamp': timestamp,
-                        'date': airbox.get('date'),
-                        'gps_lat': airbox.get('gps_lat'),
-                        'gps_lon': airbox.get('gps_lon'),
-                        's_d0': airbox.get('s_d0'),
-                        's_d1': airbox.get('s_d1'),
-                        's_d2': airbox.get('s_d2'),
-                        's_h0': airbox.get('s_h0'),
-                        's_t0': airbox.get('s_t0'),
-                    }
-                    flattened_data.append(flattened_record)       
+                    # Since timestamp is a key in the airbox dictionary, iterate over keys
+                    for timestamp_key, airbox_data in airbox.items():
+                        timestamp = timestamp_key
+                        flattened_record = {
+                            'device_id': device_id,
+                            'source': source,
+                            'timestamp': timestamp,
+                            'date': airbox_data.get('date'),
+                            'gps_lat': airbox_data.get('gps_lat'),
+                            'gps_lon': airbox_data.get('gps_lon'),
+                            's_d0': airbox_data.get('s_d0'),
+                            's_d1': airbox_data.get('s_d1'),
+                            's_d2': airbox_data.get('s_d2'),
+                            's_h0': airbox_data.get('s_h0'),
+                            's_t0': airbox_data.get('s_t0'),
+                        }
+                        flattened_data.append(flattened_record)
+    
         # Convert to DataFrame
         pm25_df = pd.DataFrame(flattened_data)
         return pm25_df
@@ -124,10 +128,16 @@ def extract_pm25_to_db():
         return set(ts[0] for ts in existing_timestamps)
 
     @task
-    def filter_new_data(pm25_df: pd.DataFrame, existing_timestamps: set):
-        """Filter out records that already exist in DuckDB."""
-        pm25_df["timestamp"] = pd.to_datetime(pm25_df["timestamp"])
-        return pm25_df[~pm25_df['timestamp'].isin(existing_timestamps)]
+    def filter_new_data(extract_data: pd.DataFrame, existing_timestamps: set):
+            """Filter out records that already exist in DuckDB."""
+            extract_data["timestamp"] = pd.to_datetime(extract_data["timestamp"], utc=True)
+    
+            # Ensure all timestamps in existing_timestamps are datetime objects
+            existing_timestamps = {pd.to_datetime(ts, utc=True) for ts in existing_timestamps}
+    
+            # Filter out rows where the timestamp is in existing_timestamps
+            filtered_data = extract_data[~extract_data['timestamp'].isin(existing_timestamps)]
+            return filtered_data
 
     @task(
         pool="duckdb", outlets=[Dataset("duckdb://include/pm25_raw")]

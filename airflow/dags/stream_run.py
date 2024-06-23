@@ -36,7 +36,7 @@ def start_streamlit_app():
     """Bash Run streamlit run script.py"""
     run_streamlit = BashOperator(
         task_id="run_streamlit_app",
-        bash_command="streamlit run airflow/include/streamlit_app.py",
+        bash_command="streamlit run include/streamlit_app.py",
     )
 
     run_streamlit
