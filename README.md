@@ -164,7 +164,7 @@ winget install -e --id Astronomer.Astro
 
   
 ## Overview of this project
-There are 3 `dag`s in the whole process, connected by datasets
+There are 2 `dag`s for data processing and 1 report for data monitoring in the whole process
 <div align="center">
   <img src="src/dependency.png">
 </div>
@@ -173,7 +173,7 @@ There are 3 `dag`s in the whole process, connected by datasets
 
 Key points:
 1. **schedule: daily, run once at midnight** 
-2. **Filter out existing records when update, set (device_id, timestamp) is UNIQUE to avoid duplicates**
+2. **Filter out existing records when update and set (device_id, timestamp) is UNIQUE to avoid duplicates**
 3. **Monitor data quality without duplicate records and correct timestamp datatype**
 
 ![dag1](src/dag1.png)
@@ -186,11 +186,9 @@ Key points:
 3. **Transformation run in a pool to prevent parallel requests to duckdb** 
 ![dag2](src/dag2.png)
 
- **DAG 3** run_streamlit, dashboarding, visualise data
-        
+A streamlit container keeps monitoring database and visualising data        
 Key points:
-1. **schedule: triggered by dag 2, as long as dag 2 runs, update the report once**
-2. **data source is pm25_ducks.db, streamlit_app.py design the report**
+1. **data source is pm25_ducks.db, streamlit_app.py design the report**
 ![dag3](src/reports.png)
 
 ## Next step

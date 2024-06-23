@@ -2,7 +2,6 @@
 # PACKAGE IMPORTS #
 # --------------- #
 
-from airflow import Dataset
 from pendulum import duration
 
 # ----------------------- #
