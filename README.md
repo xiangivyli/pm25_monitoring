@@ -1,7 +1,7 @@
 # PM2.5 Monitoring Program
 
 In this program, a final report shows 
-- a list of times when the level is above the danger threshold of 30
+- a list of times when the level is above the danger threshold of 30 (I used 22 here as an example)
 - the daily maximum, daily minimum, and daily average pollution value
 
 ## Table of Contents
@@ -21,11 +21,10 @@ In this program, a final report shows
 2. **Data Backup**: save the raw data into DuckDB with the appropriate schema
 3. **Data Transformation**: 
 - Keep the report-needed columns
-- Generate the list of times when PM2.5 is over 30
+- Generate the list of times when PM2.5 is over 30 (I used 22 as an example here, otherwise no values show)
 - Calculate the daily maximum, daily minimum, and daily average pollution value
 4. **Data Validation**: 
-- make sure the level is over 30 for the list of time
-- datatype keeps the same
+- datatype is correct
 - no duplicate records
 5. **Data Reporting**: Streamlit visualises the report-ready data and delivers insights
 
@@ -170,7 +169,7 @@ Key points:
 
 ![dag1](src/dag1.png)
 
- **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30,
+ **DAG 2** reporting_table, generate the daily maximum, minimum, average values, and detect the data beyond 30 (I used 22 here as an example),
 
 Key points:
 1. **schedule: triggered by dag 1, as long as dag 1 run, dag 2 run once**
@@ -183,6 +182,12 @@ Key points:
 Key points:
 1. **schedule: triggered by dag 2, as long as dag 2 run, update the report once**
 2. **data source is pm25_ducks.db, streamlit_app.py design the report**
+![dag3](src/reports.png)
+
+## Next step
+Deploy the program in the Cloud VM
+
+# Thanks for your time to check my project, any suggestions or questions are welcomed :)
 
 
 
