@@ -15,7 +15,7 @@ import global_variables.airflow_conf_variables as gv
 duck_db_instance_path = (
     "pm25_ducks.db"
 )
-table_name = gv.DANGER_TIME_LIST
+table_name = gv.REPORTING_DUCKDB_PM
 # -------------- #
 # DuckDB Queries #
 # -------------- #

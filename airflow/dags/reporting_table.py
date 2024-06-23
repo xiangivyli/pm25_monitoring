@@ -8,7 +8,7 @@ from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 from pendulum import datetime
 
-from duckdb_provider.hooks.duckdb_hook import DuckDBHook
+import duckdb
 
 
 # -------------------- #
@@ -40,47 +40,64 @@ def reporting_table():
            pool="duckdb", outlets=[Dataset("duckdb://include/pm25_report")]
     )
     def calculate_daily_stats(
-        conn_id: str, source_table: str, dest_table: str):
+        conn_str: str, source_table: str, dest_table: str):
         """
         Query DuckDB to calculate daily statistics and store in a new table
         Args:
-            conn_id (str): default DuckDB connection.
+            conn_str (str): default DuckDB connection.
             source_table (str): the name of table to be queried
             dest_table (str): the name of table to be created"""
-        
-        # Connect to DuckDB
-        my_duck_hook = DuckDBHook.get_hook(conn_id)
-        conn = my_duck_hook.get_conn()
+        conn = duckdb.connect(conn_str)
+        cursor = conn.cursor()
 
         # Query to calculate daily statistics
         combined_query = f"""
         SELECT 
            device_id,
            date,
-           MAX(GREATEST(s_d0, s_d1, s_d2)) AS max_s_d,
-           MIN(LEAST(s_d0, s_d1, s_d2)) AS min_s_d,
-           AVG((s_d0 + s_d1 + s_d2) / 3) AS avg_s_d
+           MAX(GREATEST(s_d0, s_d1, s_d2)) AS max_pm25,
+           MIN(LEAST(s_d0, s_d1, s_d2)) AS min_pm25,
+           AVG((s_d0 + s_d1 + s_d2) / 3) AS avg_pm25
         FROM {source_table}
         GROUP BY device_id, date;
         """
 
         # Execute the combined query and fetch the results into a DataFrame
         combined_daily_stats_df = conn.execute(combined_query).fetchdf()
+        
+        # Create empty table with correct schema
+        create_daily_table_query = f"""
+        CREATE OR REPLACE TABLE {dest_table} (
+            device_id TEXT,
+            date DATE,
+            max_pm25 DOUBLE,
+            min_pm25 DOUBLE,
+            avg_pm25 DOUBLE,
+            UNIQUE(device_id, date)
+        );
+        """
+        cursor.execute(create_daily_table_query)
 
-        # Create a new table with the combined results
-        conn.execute(f"CREATE OR REPLACE TABLE {dest_table} AS SELECT * FROM combined_daily_stats_df")
+        # Insert data into daily table
+        cursor.register("combined_daily_stats_df_view", combined_daily_stats_df)
+        insert_query = f"INSERT INTO {dest_table} SELECT * FROM combined_daily_stats_df_view"
+        cursor.execute(insert_query)
 
-        # Close the connection
+        # Close the cursor
+        conn.commit()
+        cursor.close()
         conn.close()
 
     # Run this task
     calculate_daily_stats(
-        conn_id=gv.CONN_ID_DUCKDB,
+        conn_str=gv.DB_PATH,
         source_table=gv.RAW_DUCKDB_PM,
         dest_table=gv.REPORTING_DUCKDB_PM
     )
     
-    @task
+    @task(
+        pool="duckdb", outlets=[Dataset("duckdb://include/pm25_report")]
+    )
     def list_danger_time(
         conn_id: str, source_table: str, dest_table: str):
         """
@@ -107,6 +124,7 @@ def reporting_table():
 
         # Execute the danger query and fetch the results into a DataFrame
         danger_times_df = conn.execute(danger_query).fetchdf()
+
 
         # Save the danger times to a new table
         conn.execute(f"CREATE OR REPLACE TABLE {dest_table} AS SELECT * FROM danger_times_df")
