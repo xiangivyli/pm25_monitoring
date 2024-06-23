@@ -8,6 +8,7 @@ from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 from pendulum import datetime
 
+import pandas as pd
 import duckdb
 
 
@@ -95,46 +96,59 @@ def reporting_table():
         dest_table=gv.REPORTING_DUCKDB_PM
     )
     
-    @task(
-        pool="duckdb", outlets=[Dataset("duckdb://include/pm25_report")]
-    )
+    @task()
     def list_danger_time(
-        conn_id: str, source_table: str, dest_table: str):
+        conn_str: str, source_table: str, dest_table: str):
         """
         Query DuckDB to calculate average value for each time point,
         and list dangerous time which is above 30
         Args:
-            conn_id (str): default DuckDB connection.
+            conn_str (str): default DuckDB connection.
             source_table (str): the name of table to be queried
             dest_table (str): the name of table to be created"""
     
         # Connect to DuckDB
-        my_duck_hook = DuckDBHook.get_hook(conn_id)
-        conn = my_duck_hook.get_conn()
+        conn = duckdb.connect(conn_str)
+        cursor = conn.cursor()
 
-        # Query to find time when average s_d is above 30
+        # Query to find time when average s_d is above 20
         danger_query = f"""
         SELECT
             device_id,
             timestamp,
-            (s_d0 + s_d1 + s_d2) / 3 AS avg_s_d
+            (s_d0 + s_d1 + s_d2) / 3 AS avg_pm25
         FROM {source_table}
-        WHERE (s_d0 + s_d1 + s_d2) / 3 > 30;
+        WHERE (s_d0 + s_d1 + s_d2) / 3 >= 22;
         """
 
         # Execute the danger query and fetch the results into a DataFrame
         danger_times_df = conn.execute(danger_query).fetchdf()
 
+        danger_times_df["timestamp"] = pd.to_datetime(danger_times_df["timestamp"], utc=False)
 
-        # Save the danger times to a new table
-        conn.execute(f"CREATE OR REPLACE TABLE {dest_table} AS SELECT * FROM danger_times_df")
+        # Create empty table with correct schema
+        create_danger_time_query = f"""
+        CREATE OR REPLACE TABLE {dest_table} (
+            device_id TEXT,
+            timestamp TIMESTAMP,
+            avg_pm25 DOUBLE,
+        );
+        """
+        conn.execute(create_danger_time_query)
+
+        # Insert data into danger table
+        cursor.register("danger_time_df_view", danger_times_df)
+        insert_danger_query = f"INSERT INTO {dest_table} SELECT * FROM danger_time_df_view"
+        cursor.execute(insert_danger_query)
         
-        # Close the connection
+        # Close the cursor
+        conn.commit()
+        cursor.close()
         conn.close()
 
     # Run this task
     list_danger_time(
-        conn_id=gv.CONN_ID_DUCKDB,
+        conn_str=gv.DB_PATH,
         source_table=gv.RAW_DUCKDB_PM,
         dest_table=gv.DANGER_TIME_LIST
     )
