@@ -153,7 +153,7 @@ There are 3 `dag`s in the whole process, connected by datasets
 
         Key points:
         1. **schedule: daily, run once at midnight** 
-        2. **Filter out exsiting records when update**
+        2. **Filter out exsiting records when update, set (device_id, timestamp) is UNIQUE to avoid duplicates**
         3. **Monitor data quailty without duplicate records and correct timestamp datatype**
 ![dag1](src/dag1.png)
 

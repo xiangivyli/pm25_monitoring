@@ -81,23 +81,23 @@ def extract_pm25_to_db():
             source = record.get('source')
             
             for feed in record.get('feeds', []):
-                for airbox in feed.get('AirBox', []):
-                    for timestamp, data in airbox.items():
-                        flattened_record = {
-                            'device_id': device_id,
-                            'source': source,
-                            'timestamp': timestamp,
-                            'date': data.get('date'),
-                            'gps_lat': data.get('gps_lat'),
-                            'gps_lon': data.get('gps_lon'),
-                            's_d0': data.get('s_d0'),
-                            's_d1': data.get('s_d1'),
-                            's_d2': data.get('s_d2'),
-                            's_h0': data.get('s_h0'),
-                            's_t0': data.get('s_t0'),
-                        }
-                        flattened_data.append(flattened_record)
-        
+                airbox_entries = feed.get('AirBox', [])
+                for airbox in airbox_entries:
+                    timestamp = airbox.get('time')
+                    flattened_record = {
+                        'device_id': device_id,
+                        'source': source,
+                        'timestamp': timestamp,
+                        'date': airbox.get('date'),
+                        'gps_lat': airbox.get('gps_lat'),
+                        'gps_lon': airbox.get('gps_lon'),
+                        's_d0': airbox.get('s_d0'),
+                        's_d1': airbox.get('s_d1'),
+                        's_d2': airbox.get('s_d2'),
+                        's_h0': airbox.get('s_h0'),
+                        's_t0': airbox.get('s_t0'),
+                    }
+                    flattened_data.append(flattened_record)       
         # Convert to DataFrame
         pm25_df = pd.DataFrame(flattened_data)
         return pm25_df
@@ -126,6 +126,7 @@ def extract_pm25_to_db():
     @task
     def filter_new_data(pm25_df: pd.DataFrame, existing_timestamps: set):
         """Filter out records that already exist in DuckDB."""
+        pm25_df["timestamp"] = pd.to_datetime(pm25_df["timestamp"])
         return pm25_df[~pm25_df['timestamp'].isin(existing_timestamps)]
 
     @task(
@@ -157,7 +158,8 @@ def extract_pm25_to_db():
             s_d1 DOUBLE,
             s_d2 DOUBLE,
             s_h0 DOUBLE,
-            s_t0 DOUBLE
+            s_t0 DOUBLE,
+            UNIQUE(device_id, timestamp)
         );
         """
         cursor.execute(create_table_query)
@@ -178,13 +180,19 @@ def extract_pm25_to_db():
         """Check for duplicate timestamps in the DuckDB table."""
         conn = duckdb.connect(conn_str)
         query = f"""
-        SELECT timestamp, COUNT(*) as count
+        SELECT device_id, timestamp, COUNT(*) as count
         FROM {pm25_table_name}
-        GROUP BY timestamp
+        WHERE timestamp is NOT NULL
+        GROUP BY device_id, timestamp
         HAVING COUNT(*) > 1
         """
-        duplicates = conn.execute(query).fetchall()
-        conn.close()
+        try:
+            duplicates = conn.execute(query).fetchall()
+        except duckdb.CatalogException:
+            print(f"Table {pm25_table_name} does not exist. Exiting safely.")
+            return
+        finally:
+            conn.close()
 
         if duplicates:
             raise ValueError(f"Duplicate timestamps found: {duplicates}")
@@ -197,8 +205,13 @@ def extract_pm25_to_db():
         query = f"""
         PRAGMA table_info({pm25_table_name})
         """
-        result = conn.execute(query).fetchall()
-        conn.close()
+        try:
+            result = conn.execute(query).fetchall()
+        except duckdb.CatalogException:
+            print(f"Table {pm25_table_name} does not exist. Exiting safely.")
+            return
+        finally:
+            conn.close()
 
         for column in result:
             col_name, col_type = column[1], column[2]
