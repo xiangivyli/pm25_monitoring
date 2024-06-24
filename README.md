@@ -50,6 +50,7 @@ Used Techniques are:
 ├── README.md #this file
 ├── abseil-cpp #library to support airflow-provider-duckdb package
 ├── airflow
+│   ├── docker-compose.override.yml # mount volumes for containers, especially for the shared database
 │   ├── Dockerfile
 │   ├── README.md
 │   ├── dags #all pipelines are defined in this folder
@@ -99,16 +100,17 @@ curl -sSL install.astronomer.io | sudo bash -s
 ```bash
 astro dev start
 ```
-- Go to port 8080 to check the data pipeline in the UI, user:admin, password:admin
+- Go to port 8080 to check the data pipeline in the UI, user:admin, password:admin (click ⬅ if the page does not show)
+- `CTRL`+ C if the terminal of the CodeSpaces pops up a weird option
 - The Forwarded Address is in the PORTS, click the Open in Brower
 ![ports](src/ports.png)
 
 
-Unpause these dags, they will start to run once, until dag1 is set to run daily, dag2 for transformation is set to run triggered by dag1
+Unpause these dags, they will start to run once, then dag1 is set to run daily, dag2 for transformation is set to run triggered by dag1
 ![airflow_ui](src/airflow_ui.png)
 
-- Go to port 8501 to monitor the current status of database
-- The Forwarded Address is in the PORTS, clink the Open in Brower
+- Go to port 8501 to monitor the current status of the database
+- The Forwarded Address is in the PORTS, click the Open in Brower
 
 ### Option 1 Ubuntu 20.04 (Linux environment)
 #### Getting Start
@@ -176,7 +178,7 @@ There are 2 `dag`s for data processing and 1 report for data monitoring in the w
   <img src="src/dependency.png">
 </div>
 
-**DAG 1** extract_pm25_to_db, get JSON data from API, convert it to dataframe and insert into DuckDB, 
+**DAG 1** **extract_pm25_to_db**, get JSON data from API, convert it to dataframe and insert into DuckDB, 
 
 Key points:
 1. **schedule: daily, run once at midnight** 
@@ -185,7 +187,7 @@ Key points:
 
 ![dag1](src/dag1.png)
 
- **DAG 2** reporting_table, generate the daily maximum, minimum, and average values, and detect the data beyond 30 (I used 22 here as an example),
+ **DAG 2** **reporting_table**, generate the daily maximum, minimum, and average values, and detect the data beyond 30 (I used 22 here as an example),
 
 Key points:
 1. **schedule: triggered by dag 1, as long as dag 1 runs, dag 2 runs once**
@@ -193,7 +195,7 @@ Key points:
 3. **Transformation run in a pool to prevent parallel requests to duckdb** 
 ![dag2](src/dag2.png)
 
-A streamlit container keeps monitoring database and visualising data        
+**A streamlit container** keeps monitoring the database and visualising data        
 Key points:
 1. **data source is pm25_ducks.db, streamlit_app.py design the report**
 ![dag3](src/reports.png)
