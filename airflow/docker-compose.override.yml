@@ -7,15 +7,24 @@ services:
       - "8501:8501"
     volumes:
       - ./include:/app/include
+
   scheduler:
+    volumes:
+      - ./include:/app/include
     extra_hosts:
       - "host.docker.internal:host-gateway"
   webserver:
+    volumes:
+      - ./include:/app/include
     extra_hosts:
       - "host.docker.internal:host-gateway"
   triggerer:
+    volumes:
+      - ./include:/app/include
     extra_hosts:
       - "host.docker.internal:host-gateway"
   postgres:
+    volumes:
+      - ./include:/app/include
     extra_hosts:
       - "host.docker.internal:host-gateway"

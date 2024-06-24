@@ -13,7 +13,7 @@ import global_variables.airflow_conf_variables as gv
 # --------- #
 
 duck_db_instance_path = (
-    "pm25_ducks.db"
+    "/app/include/pm25_ducks.db"
 )
 table_name = gv.REPORTING_DUCKDB_PM
 list_name = gv.DANGER_TIME_LIST
@@ -21,45 +21,10 @@ list_name = gv.DANGER_TIME_LIST
 # DuckDB Queries #
 # -------------- #
 
-def daily_data_read(db=duck_db_instance_path, table_name=table_name):
-    try:
-        conn = duckdb.connect(db)
-
-        # Query to retrieve data from daily table
-        query = f"""SELECT *
-        FROM {table_name}"""
-
-        # Execute the query
-        cursor = conn.execute(query)
-        daily_data_df = cursor.fetchdf()
-
-        conn.close()
-
-        return daily_data_df
-
-    except Exception as e:
-        st.error(f"Error reading data: {e}")
-        return pd.DataFrame()
-
-def danger_time_read(db=duck_db_instance_path, table_name=list_name):
-    try:
-        conn = duckdb.connect(db)
-
-        # Query to retrieve data from daily table
-        query = f"""SELECT *
-        FROM {table_name}"""
-
-        # Execute the query
-        cursor = conn.execute(query)
-        danger_data_df = cursor.fetchdf()
-
-        conn.close()
-
-        return danger_data_df
-
-    except Exception as e:
-        st.error(f"Error reading data: {e}")
-        return pd.DataFrame()
+conn = duckdb.connect(database=duck_db_instance_path, read_only=True)
+daily_data = conn.execute("SELECT * FROM combined_daily_pm25_stats").df()
+danger_time_data = conn.execute("SELECT * FROM combined_daily_pm25_stats").df()
+conn.close()
 
 # ------------- #
 # STREAMLIT APP #
@@ -70,7 +35,7 @@ st.title(f"PM2.5 Monitoring for {gv.device_IDs}")
 st.subheader("SiteName:新北市清水國小")
 
 # Display daily time data
-daily_data = daily_data_read()
+
 if not daily_data.empty:
     st.dataframe(daily_data)
 else:
@@ -78,7 +43,7 @@ else:
 
 # Display danger time data
 st.subheader("Danger Time Data (PM2.5 > 22)")
-danger_time_data = danger_time_read()
+
 if not danger_time_data.empty:
     st.dataframe(danger_time_data)
 else:
