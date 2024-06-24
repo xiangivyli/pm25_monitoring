@@ -94,14 +94,16 @@ curl -sSL install.astronomer.io | sudo bash -s
 ```bash
 astro dev start
 ```
-- Go to port 8080 to check the data pipeline in the UI
-URL: http://localhost:8080
+- Go to port 8080 to check the data pipeline in the UI, user:admin, password:admin
+- The Forwarded Address is in the PORTS, click the Open in Brower
+![ports](src/ports.png)
+
 
 Unpause these dags, they will start to run once, until dag1 is set to run daily, dag2 for transformation is set to run triggered by dag1
 ![airflow_ui](src/airflow_ui.png)
 
 - Go to port 8501 to monitor the current status of database
-URL: http://localhost:8501
+- The Forwarded Address is in the PORTS, clink the Open in Brower
 
 ### Option 1 Ubuntu 20.04 (Linux environment)
 #### Getting Start
