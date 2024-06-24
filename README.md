@@ -67,15 +67,16 @@ Used Techniques are:
 │   │   └── test.py
 │   ├── packages.txt
 │   ├── plugins
-│   ├── pm25_ducks.db
 │   ├── requirements.txt #list all dependencies
 │   └── tests
 │       └── dags
 └── src
+    ├── airflow_ui.png
     ├── dag1.png
     ├── dag2.png
     ├── dependency.png
     ├── fork_and_codespaces.png
+    ├── ports.png
     └── reports.png
 ```
 
