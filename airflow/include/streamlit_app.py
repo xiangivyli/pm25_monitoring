@@ -31,18 +31,11 @@ def daily_data_read(db=duck_db_instance_path, table_name=table_name):
 
         # Execute the query
         cursor = conn.execute(query)
-        daily_data = cursor.fetchall()
-
-        # Fetch column names
-        column_names = [desc[0] for desc in cursor.description]
+        daily_data_df = cursor.fetchdf()
 
         conn.close()
 
-        # Create a DataFrame from the fetched data
-        df = pd.DataFrame(
-            daily_data, columns=column_names
-        )
-        return df
+        return daily_data_df
 
     except Exception as e:
         st.error(f"Error reading data: {e}")
@@ -58,18 +51,11 @@ def danger_time_read(db=duck_db_instance_path, table_name=list_name):
 
         # Execute the query
         cursor = conn.execute(query)
-        daily_data = cursor.fetchall()
-
-        # Fetch column names
-        column_names = [desc[0] for desc in cursor.description]
+        danger_data_df = cursor.fetchdf()
 
         conn.close()
 
-        # Create a DataFrame from the fetched data
-        df = pd.DataFrame(
-            daily_data, columns=column_names
-        )
-        return df
+        return danger_data_df
 
     except Exception as e:
         st.error(f"Error reading data: {e}")
@@ -97,5 +83,3 @@ if not danger_time_data.empty:
     st.dataframe(danger_time_data)
 else:
     st.write("No danger time data available.")
-
-
