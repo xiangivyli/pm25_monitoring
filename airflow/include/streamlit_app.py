@@ -77,9 +77,10 @@ else:
     st.write("No data available.")
 
 # Display danger time data
-st.subheader("Danger Time Data")
+st.subheader("Danger Time Data (PM2.5 > 22)")
 danger_time_data = danger_time_read()
 if not danger_time_data.empty:
     st.dataframe(danger_time_data)
 else:
     st.write("No danger time data available.")
+
