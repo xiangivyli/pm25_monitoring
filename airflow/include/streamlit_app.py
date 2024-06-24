@@ -22,8 +22,8 @@ list_name = gv.DANGER_TIME_LIST
 # -------------- #
 
 conn = duckdb.connect(database=duck_db_instance_path, read_only=True)
-daily_data = conn.execute("SELECT * FROM combined_daily_pm25_stats").df()
-danger_time_data = conn.execute("SELECT * FROM combined_daily_pm25_stats").df()
+daily_data = conn.execute(f"SELECT * FROM {gv.REPORTING_DUCKDB_PM}").df()
+danger_time_data = conn.execute(f"SELECT * FROM {gv.DANGER_TIME_LIST}").df()
 conn.close()
 
 # ------------- #
