@@ -45,7 +45,39 @@ else:
 st.subheader("Danger Time Data (PM2.5 > 22)")
 
 if not danger_time_data.empty:
-    st.dataframe(danger_time_data)
+    st.dataframe(danger_time_data, height=400)
 else:
     st.write("No danger time data available.")
 
+# Custom CSS for grey background
+st.markdown(
+    """
+    <style>
+    .main {
+        background-color: #f0f0f0;
+        color: #000000;
+    }
+    .stDataFrame {
+        background-color: #ffffff;
+        color: #000000;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    .stTitle, .stSubheader {
+        color: #333333;
+    }
+    .stTable {
+        color: #000000;
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    .css-18e3th9 {
+        padding: 2rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
