@@ -8,6 +8,7 @@ from airflow.decorators import dag, task
 from pendulum import datetime
 import pandas as pd
 import duckdb
+import logging
 #import random
 from airflow.operators.bash import BashOperator
 
@@ -129,16 +130,32 @@ def extract_pm25_to_db():
 
     @task
     def filter_new_data(extract_data: pd.DataFrame, existing_timestamps: set):
-            """Filter out records that already exist in DuckDB."""
-            extract_data["timestamp"] = pd.to_datetime(extract_data["timestamp"], utc=True)
+        """Filter out records that already exist in DuckDB."""
     
-            # Ensure all timestamps in existing_timestamps are datetime objects
-            existing_timestamps = {pd.to_datetime(ts, utc=True) for ts in existing_timestamps}
+        # Check if the extract_data DataFrame is empty
+        if extract_data.empty:
+            logging.info("The extract_data DataFrame is empty.")
+            return extract_data
     
-            # Filter out rows where the timestamp is in existing_timestamps
-            filtered_data = extract_data[~extract_data['timestamp'].isin(existing_timestamps)]
-            return filtered_data
-
+        # Check if 'timestamp' column exists in extract_data
+        if 'timestamp' not in extract_data.columns:
+            logging.error("The 'timestamp' column is missing from the extract_data DataFrame.")
+            raise KeyError("The 'timestamp' column is missing from the extract_data DataFrame.")
+        
+        # Convert 'timestamp' column to datetime
+        extract_data["timestamp"] = pd.to_datetime(extract_data["timestamp"], utc=True)
+    
+        # If there are no existing timestamps, return the extract_data as is
+        if not existing_timestamps:
+            return extract_data
+    
+        # Ensure all timestamps in existing_timestamps are datetime objects
+        existing_timestamps = {pd.to_datetime(ts, utc=True) for ts in existing_timestamps}
+    
+        # Filter out rows where the timestamp is in existing_timestamps
+        filtered_data = extract_data[~extract_data['timestamp'].isin(existing_timestamps)]
+        return filtered_data
+    
     @task(
         pool="duckdb", outlets=[Dataset("duckdb://include/pm25_raw")]
     )
@@ -151,6 +168,10 @@ def extract_pm25_to_db():
            pm25_table_name (str): the name of the table to be created in DuckDB.
            pm25_df (pd.DataFrame): the DataFrame to be loaded into DuckDB"""
 
+        # Check if the pm25_df DataFrame is empty
+        if pm25_df.empty:
+            logging.info("The pm25_df DataFrame is empty. No data to load into DuckDB.")
+            return
         # Connect to DuckDB
         conn = duckdb.connect(conn_str)
         cursor = conn.cursor()

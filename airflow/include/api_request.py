@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import logging
 
 # function to fetch device_ids from the API 
 def fetch_device_ids(url):
@@ -24,14 +25,19 @@ def get_last_7_days_pm25(device_id):
     try:
         # Define the URL for the device history endpoint
         api_url = f"https://pm25.lass-net.org/API-1.0.0/device/{device_id}/history/?format=JSON"
+        logging.info(f"Fetching data from API for device ID {device_id}")
+        
         # Send a GET request to the API
         response = requests.get(api_url)
+        
         # Raise an exception if the request was unsuccessful
         response.raise_for_status()
+        
         # Parse the JSON response
         data = response.json()
+        logging.info(f"Successfully fetched data for device ID {device_id}")
 
         return data
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching data from API: {e}")
+        logging.error(f"Error fetching data from API for device ID {device_id}: {e}")
         return None

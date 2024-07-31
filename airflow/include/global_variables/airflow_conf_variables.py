@@ -12,7 +12,7 @@ from pendulum import duration
 api_url = "https://pm25.lass-net.org/API-1.0.0/project/airbox/latest/"
 
 # device id
-device_IDs = ["74DA38F7C4B0"]
+device_IDs = ["74DA38F7C254"]
 
 # DuckDB config
 DB_PATH = "include/pm25_ducks.db"
