@@ -290,4 +290,6 @@ def extract_pm25_to_db():
         bash_command="airflow pools list | grep -q 'duckdb' || airflow pools set duckdb 1 'Pool for duckdb'"
     )
 
+    create_duckdb_pool >> table_task
+    
 extract_pm25_to_db()
