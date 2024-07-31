@@ -265,17 +265,21 @@ def extract_pm25_to_db():
     new_pm25_df = filter_new_data(pm25_df, existing_timestamps)
 
     # Insert into database
-    turn_df_into_table(
+    table_task = turn_df_into_table(
         conn_str=gv.DB_PATH,
         pm25_table_name=gv.RAW_DUCKDB_PM,
         pm25_df=new_pm25_df
     )
 
     # Check for duplicate data in the table
-    check_for_duplicates(conn_str=gv.DB_PATH, pm25_table_name=gv.RAW_DUCKDB_PM)
+    duplicate_test_task = check_for_duplicates(conn_str=gv.DB_PATH, pm25_table_name=gv.RAW_DUCKDB_PM)
 
     # Check that the timestamp column has the correct datatype
-    check_timestamp_datatype(conn_str=gv.DB_PATH, pm25_table_name=gv.RAW_DUCKDB_PM)
+    datatype_test_task = check_timestamp_datatype(conn_str=gv.DB_PATH, pm25_table_name=gv.RAW_DUCKDB_PM)
+
+    # Set dependencies
+    table_task >> duplicate_test_task
+    table_task >> datatype_test_task
 
     # This task uses the BashOperator to run a bash command creating an Airflow
     # pool called 'duckdb' which contains one worker slot. All tasks running
