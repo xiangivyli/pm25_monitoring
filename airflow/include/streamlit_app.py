@@ -45,7 +45,7 @@ else:
 st.subheader("Danger Time Data (PM2.5 > 22)")
 
 if not danger_time_data.empty:
-    st.dataframe(danger_time_data, height=400)
+    st.dataframe(danger_time_data, height=400,use_container_width=True)
 else:
     st.write("No danger time data available.")
 
