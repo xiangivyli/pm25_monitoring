@@ -4,8 +4,6 @@ In this program, a final report will **monitor the PM2.5 in real-time**
 - the daily maximum, daily minimum, and daily average pollution value
 - a list of times when the level is above the danger threshold of 30 (I used 22 here as an example)
 
-Like this: 
-![finalreport](src/reports.png)
 
 ## Table of Contents
 - [Abstract](#abstract)
