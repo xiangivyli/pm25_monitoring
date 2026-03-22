@@ -5,8 +5,7 @@ In this program, a final report will **monitor the PM2.5 in real-time**
 - a list of times when the level is above the danger threshold of 30 (I used 22 here as an example)
 
 Like this: 
-
-<img src="src/reports.png" alt="Image description" width="200" height="200" />
+![finalreport](src/reports.png)
 
 ## Table of Contents
 - [Abstract](#abstract)
@@ -21,6 +20,7 @@ Like this:
 ### Project: airbox 
 
 ### The workflow is
+![workflow](src/PM25_Monitoring_Workflow.png)
 1. **Data Acquisition**: read the data for a device using the /device/<device_id>/history/ endpoint (I tried to generate the device_id list from project endpoint)
 2. **Data Backup**: save the raw data into DuckDB with the appropriate schema
 3. **Data Transformation**: 
